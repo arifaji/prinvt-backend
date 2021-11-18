@@ -21,7 +21,9 @@
     "lodash": "^4.17.21",
     "mongoose": "^5.13.13",
     "morgan": "^1.10.0",
-    "nodemon": "^2.0.15",
     "winston": "^3.3.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
   }
 }
