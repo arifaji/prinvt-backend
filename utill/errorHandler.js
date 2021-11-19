@@ -35,7 +35,8 @@ const handleError = (err, res) => {
       message: _defaultMessage(message, statusCode)
     }); 
   } catch (e) {
-    internalServerError(res, err);
+    const error = err ? err : e
+    internalServerError(res, `${e} | ${err}`, _pathName(error));
   }
 };
 

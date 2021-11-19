@@ -53,10 +53,11 @@ exports.forbidden = function(res, message = 'Forbidden...') {
 };
 
 // The server has encountered a situation it does not know how to handle.
-exports.internalServerError = function(res, message = 'Internal Server Error...') {
+exports.internalServerError = function(res, message = 'Internal Server Error...', path) {
   var data = {
     'success': false,
-    message
+    message,
+    path
   };
   res.status(500).json(data);
   res.end();
