@@ -1,6 +1,7 @@
 const { httpStatusDefaultMesage } = require('../utill/enums');
 const { internalServerError } = require('../utill/response');
-
+const loger = require('../utill/logger');
+const logger = require('../utill/logger');
 
 class ErrorHandler extends Error {
   constructor(statusCode, message) {
@@ -36,7 +37,8 @@ const handleError = (err, res) => {
     }); 
   } catch (e) {
     const error = err ? err : e
-    internalServerError(res, `${e} | ${err}`, _pathName(error));
+    logger.error({ message: error.message, path: _pathName(error)})
+    internalServerError(res, error.message, _pathName(error));
   }
 };
 
