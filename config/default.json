@@ -1,5 +1,7 @@
 {
   "name": "Prinvt App",
   "jwtPrivateKey": "1234",
-  "db": "mongodb://localhost/prinvt"
+  "db": "mongodb://localhost/prinvt",
+  "emailService": "xxxxxxxxx@aol.com",
+  "passwordEmailService": "xxxxxxxxxxxx"
 }

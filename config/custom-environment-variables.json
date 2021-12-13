@@ -1,4 +1,6 @@
 {
   "jwtPrivateKey": "prinvt_jwtPrivateKey",
-  "db": "prinvt_db"
+  "db": "prinvt_db",
+  "emailService": "prinvt_emailService",
+  "passwordEmailService": "prinvt_passwordEmailService"
 }
