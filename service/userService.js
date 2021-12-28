@@ -6,6 +6,8 @@ const { ErrorHandler } = require('../utill/errorHandler');
 const { httpStatus, userStatus } = require('../utill/enums');
 const jwt = require('jsonwebtoken');
 const config = require('config');
+const emailNotificationService = require('./emailNotificationService');
+const emailTemplate = require('../email/template');
 
 class UserService {
     static async login(payload) {
@@ -48,9 +50,23 @@ class UserService {
         const salt = await bcrypt.genSaltSync(10);
         user.password = await bcrypt.hashSync(user.password, salt);
         await user.save();
-
         const token = user.generateVerificationToken();
+        const link = `http://localhost:3000/verification/${token}`
+        let breaklink = ''
+        link.match(/.{1,50}/g).forEach(link => {
+            breaklink = breaklink + '<br />' + link
+        })
+        await emailNotificationService.sendEmailNotification({
+            toOne: email,
+            subject: 'Welcome to Prinvt!',
+            html: emailTemplate.verification({
+                link,
+                breaklink
+            })
+        })
         return {
+          link,
+          breaklink,
           token,
           user: _.pick(user, ['_id', 'name', 'email', 'status'])
         };

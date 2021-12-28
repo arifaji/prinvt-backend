@@ -36,7 +36,7 @@ userSchema.methods.generateAuthToken = function() {
 }
 
 userSchema.methods.generateVerificationToken = function() { 
-  const token = jwt.sign({ _id: this._id, status: this.status }, config.get('jwtPrivateKey'));
+  const token = jwt.sign({ _id: this._id, status: this.status }, config.get('jwtPrivateKey'), { expiresIn: '15m' });
   return token;
 }
 
