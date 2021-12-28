@@ -3,7 +3,9 @@ const _ = require('lodash');
 const { User, validate } = require('../models/user');
 const Joi = require('joi');
 const { ErrorHandler } = require('../utill/errorHandler');
-const { httpStatus } = require('../utill/enums');
+const { httpStatus, userStatus } = require('../utill/enums');
+const jwt = require('jsonwebtoken');
+const config = require('config');
 
 class UserService {
     static async login(payload) {
@@ -35,21 +37,41 @@ class UserService {
 
     static async register(payload) {
         const { error } = validate(payload);
+        const { name, email, password } = payload;
         if (error) throw new ErrorHandler(httpStatus.bad, error.details[0].message);
         let user = await User.findOne({ email: payload.email });
         if (user) throw new ErrorHandler(httpStatus.bad, 'User already registered.');
 
-        user = new User(_.pick(payload, ['name', 'email', 'password']));
+        user = new User({
+            name, email, password, status: userStatus.NEWREG
+        });
         const salt = await bcrypt.genSaltSync(10);
         user.password = await bcrypt.hashSync(user.password, salt);
         await user.save();
 
-        const token = user.generateAuthToken();
+        const token = user.generateVerificationToken();
         return {
           token,
-          user: _.pick(user, ['_id', 'name', 'email'])
+          user: _.pick(user, ['_id', 'name', 'email', 'status'])
         };
     }
+
+    static async verification(token) {
+        try {
+            const decoded = jwt.verify(token, config.get('jwtPrivateKey'));
+            const filter = { _id: decoded._id, status: decoded.status };
+            const update = { status: userStatus.ACTIVE };
+            const user = await User.findOneAndUpdate(filter, update, {
+                new: true
+            });
+        
+            if (!user) throw new ErrorHandler(httpStatus.bad, `Can't verify this user.`);
+            
+            return _.pick(user, ['_id', 'name', 'email', 'status']);
+        } catch (error) {
+            throw new ErrorHandler(httpStatus.bad, error.message);
+        }
+    }    
 }
 
 module.exports = UserService

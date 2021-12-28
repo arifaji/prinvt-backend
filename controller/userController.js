@@ -32,6 +32,15 @@ class UserController {
             next(error);
         }
     }
+
+    static async verification(req, res, next) {
+        try {
+            const user = await userService.verification(req.params.token);
+            response.ok(res, user);
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = UserController
