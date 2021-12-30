@@ -1,7 +1,7 @@
 const nodemailer = require('nodemailer');
 const config = require('config');
-const { ErrorHandler } = require('../utill/errorHandler');
-const { httpStatus } = require('../utill/enums');
+const { ErrorHandler } = require('../util/errorHandler');
+const { httpStatus } = require('../util/enums');
 const Joi = require('joi');
 
 class EmailNotificationService {

@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const _ = require('lodash');
 const { User, validate } = require('../models/user');
 const userService = require('../service/userService');
-const response = require('../utill/response');
+const response = require('../util/response');
 
 class UserController {
     static async login (req, res, next) {

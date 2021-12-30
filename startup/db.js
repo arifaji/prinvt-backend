@@ -1,4 +1,4 @@
-const logger = require('../utill/logger')
+const logger = require('../util/logger')
 const mongoose = require('mongoose');
 const config = require('config');
 

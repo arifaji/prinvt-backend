@@ -1,5 +1,5 @@
 const helmet = require('helmet');
-const logger = require('./utill/logger');
+const logger = require('./util/logger');
 const express = require('express');
 const app = express();
 app.use(helmet());

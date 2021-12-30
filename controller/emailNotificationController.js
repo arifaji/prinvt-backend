@@ -1,4 +1,4 @@
-const response = require('../utill/response');
+const response = require('../util/response');
 const Joi = require('joi');
 const emailNotificationService = require('../service/emailNotificationService');
 

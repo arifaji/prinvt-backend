@@ -1,7 +1,7 @@
-const { httpStatusDefaultMesage } = require('../utill/enums');
-const { internalServerError } = require('../utill/response');
-const loger = require('../utill/logger');
-const logger = require('../utill/logger');
+const { httpStatusDefaultMesage } = require('../util/enums');
+const { internalServerError } = require('../util/response');
+const loger = require('../util/logger');
+const logger = require('../util/logger');
 
 class ErrorHandler extends Error {
   constructor(statusCode, message) {
