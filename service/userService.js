@@ -12,13 +12,27 @@ const emailTemplate = require('../email/template');
 class UserService {
     static async login(payload) {
       const { error } = UserService._loginValidate(payload);
-      if (error) throw new ErrorHandler(httpStatus.bad, error.details[0].message);
+      if (error) {
+        throw new ErrorHandler(httpStatus.bad, error.details[0].message);
+      }
 
       let user = await User.findOne({ email: payload.email });
-      if (!user) throw new ErrorHandler(httpStatus.bad, 'Invalid email or password.');
+      if (!user) {
+        throw new ErrorHandler(httpStatus.bad, 'Invalid email or password.');
+      }
 
       const validPassword = await bcrypt.compareSync(payload.password, user.password);
-      if (!validPassword) throw new ErrorHandler(httpStatus.bad, 'Invalid email or password.');
+      if (!validPassword) {
+        throw new ErrorHandler(httpStatus.bad, 'Invalid email or password.');
+      }
+
+      if (user.status === userStatus.NEWREG) {
+        throw new ErrorHandler(
+          httpStatus.forbidden,
+          'Please Verify Your Email.',
+          { email: user.email }
+        );
+      }
 
       return user.generateAuthToken();
     }

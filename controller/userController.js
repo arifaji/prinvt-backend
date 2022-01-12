@@ -1,6 +1,3 @@
-const bcrypt = require('bcrypt');
-const _ = require('lodash');
-const { User, validate } = require('../models/user');
 const userService = require('../service/userService');
 const response = require('../util/response');
 

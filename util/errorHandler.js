@@ -4,10 +4,11 @@ const loger = require('../util/logger');
 const logger = require('../util/logger');
 
 class ErrorHandler extends Error {
-  constructor(statusCode, message) {
+  constructor(statusCode, message, data) {
     super();
     this.statusCode = statusCode;
     this.message = message;
+    this.data = data;
   }
 }
 
@@ -30,10 +31,11 @@ const _pathName = (err) => {
 const handleError = (err, res) => {
   try {
     if(!(err instanceof ErrorHandler)) throw new Error;
-    const { statusCode, message } = err;
+    const { statusCode, message, data } = err;
     res.status(statusCode).json({
       success: false,
-      message: _defaultMessage(message, statusCode)
+      message: _defaultMessage(message, statusCode),
+      ...data
     }); 
   } catch (e) {
     const error = err ? err : e
