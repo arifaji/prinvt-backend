@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const _ = require('lodash');
 const { User, validate } = require('../models/user');
+const { LoginActivity } = require('../models/loginActivity');
 const Joi = require('joi');
 const { ErrorHandler } = require('../util/errorHandler');
 const { httpStatus, userStatus } = require('../util/enums');
@@ -8,9 +9,33 @@ const jwt = require('jsonwebtoken');
 const config = require('config');
 const emailNotificationService = require('./emailNotificationService');
 const emailTemplate = require('../email/template');
+const parser = require('ua-parser-js');
+const { Event, validate: validateEvents } = require('../models/event');
 
 class UserService {
-    static async login(payload) {
+    static async insertEvents(req) {
+      const payload = _.get(req, 'body');
+      payload.createdBy = req.user._id
+      const { error } = validateEvents(payload);
+      if (error) {
+        throw new ErrorHandler(httpStatus.bad, error.details[0].message);
+      }
+      const { createdBy, eventName, eventDetail, startDate, endDate, province, city, detailLocation, isMultiScan } = payload
+      const newevent = new Event({
+        createdBy, eventName, eventDetail, startDate, endDate, province, city, detailLocation, isMultiScan
+      });
+      await newevent.save()
+      return newevent
+    }
+
+    static async getAllEventByUserId(req) {
+      const createdBy = req.user._id;
+      const events = await Event.find({ createdBy }).exec();
+      return events;
+    }
+
+    static async login(req) {
+      const payload = _.get(req, 'body');
       const { error } = UserService._loginValidate(payload);
       if (error) {
         throw new ErrorHandler(httpStatus.bad, error.details[0].message);
@@ -28,13 +53,31 @@ class UserService {
 
       if (user.status === userStatus.NEWREG) {
         throw new ErrorHandler(
-          httpStatus.forbidden,
+          httpStatus.unauthorized,
           'Please Verify Your Email.',
           { email: user.email }
         );
       }
 
-      return user.generateAuthToken();
+      const loginActivity = await UserService._loginActivity({ req, id: user._id })
+
+      return user.generateAuthToken(loginActivity._id);
+    }
+
+    static _loginActivity ({ req, id}) {
+      const ip = (req.headers['x-forwarded-for'] || '').split(',').pop().trim() || req.socket.remoteAddress
+      const ua = parser(req.headers['user-agent']);
+
+      const loginActivity = new LoginActivity({
+        ip,
+        userId: id,
+        browser: _.get(ua, 'browser.name', null),
+        os: _.get(ua, 'os.name', null),
+        device: _.get(ua, 'device.model', null),
+        cpu: _.get(ua, 'cpu.architecture', null),
+        lastActive: Date.now()
+      })
+      return loginActivity.save();
     }
 
     static _loginValidate(payload) {
