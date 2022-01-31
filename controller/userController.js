@@ -25,6 +25,24 @@ class UserController {
         }
     }
 
+    static async getAccount(req, res, next) {
+        try {
+            const user = await userService.getAccount(req.user._id);
+            response.ok(res, user);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    static async editAccount(req, res, next) {
+        try {
+            const user = await userService.editAccount(req);
+            response.ok(res, user);
+        } catch (error) {
+            next(error);
+        }
+    }
+
     static async login (req, res, next) {
         try {
             const token = await userService.login(req);
@@ -35,7 +53,7 @@ class UserController {
         }
     }
 
-    static async me(req, res) {
+    static async me(req, res, next) {
         try {
             const user = await userService.me(req.user._id);
             response.ok(res, user);

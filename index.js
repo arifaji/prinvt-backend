@@ -2,6 +2,10 @@ const helmet = require('helmet');
 const logger = require('./util/logger');
 const express = require('express');
 const app = express();
+const bodyParser = require('body-parser');
+
+app.use(bodyParser.json({limit: '500kb'}));
+app.use(bodyParser.urlencoded({limit: '500kb', extended: true}));
 app.use(helmet());
 
 require('./routes')(app);

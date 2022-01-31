@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const _ = require('lodash');
-const { User, validate } = require('../models/user');
+const { User, validate: validateUser } = require('../models/user');
 const { LoginActivity } = require('../models/loginActivity');
 const Joi = require('joi');
 const { ErrorHandler } = require('../util/errorHandler');
@@ -59,9 +59,11 @@ class UserService {
         );
       }
 
-      const loginActivity = await UserService._loginActivity({ req, id: user._id })
+      // const loginActivity = await UserService._loginActivity({ req, id: user._id })
 
-      return user.generateAuthToken(loginActivity._id);
+      // return user.generateAuthToken(loginActivity._id);
+
+      return user.generateAuthToken();
     }
 
     static _loginActivity ({ req, id}) {
@@ -89,20 +91,57 @@ class UserService {
         return schema.validate(payload);
     }
 
+    static async getAccount(id) {
+      const user = await User.findById(id).select('-password');
+      return user;
+    }
+
+    static async editAccount(req) {
+      const { error } = UserService._editAccountValidate(req.body);
+      if (error) {
+        throw new ErrorHandler(httpStatus.bad, error.details[0].message);
+      }
+
+      const account = await User.findByIdAndUpdate(req.user._id, { 
+        fullname: req.body.fullname,
+        avatar: req.body.avatar
+      },
+      {
+        new: true
+      }).select('-password');
+
+      if (!account) {
+        throw new ErrorHandler(httpStatus.bad, 'Account not exist');
+      };
+      
+      return account
+    }
+
+    static _editAccountValidate(payload) {
+      const schema = Joi.object({
+        fullname: Joi.string().min(5).max(255).required(),
+        avatar: Joi.string().allow(null)
+      });
+
+      return schema.validate(payload);
+    }
+
     static async me(id) {
-        const user = await User.findById(id).select('-password');
-        return user;
+        const user = await User.findById(id);
+        return _.pick(user, ['_id', 'username', 'email', 'status', 'avatar']);
     }
 
     static async register(payload) {
-        const { error } = validate(payload);
-        const { name, email, password } = payload;
+        const { error } = validateUser(payload);
+        const { fullname, username, email, password } = payload;
         if (error) throw new ErrorHandler(httpStatus.bad, error.details[0].message);
         let user = await User.findOne({ email: payload.email });
-        if (user) throw new ErrorHandler(httpStatus.bad, 'User already registered.');
+        if (user) throw new ErrorHandler(httpStatus.bad, 'Email already registered.');
+        user = await User.findOne({ username: payload.username });
+        if (user) throw new ErrorHandler(httpStatus.bad, 'Username already registered.');
 
         user = new User({
-            name, email, password, status: userStatus.NEWREG
+          fullname, username, email, password, status: userStatus.NEWREG
         });
         const salt = await bcrypt.genSaltSync(10);
         user.password = await bcrypt.hashSync(user.password, salt);
@@ -125,7 +164,7 @@ class UserService {
           link,
           breaklink,
           token,
-          user: _.pick(user, ['_id', 'name', 'email', 'status'])
+          user: _.pick(user, ['_id', 'username', 'email', 'status'])
         };
     }
 
@@ -140,7 +179,7 @@ class UserService {
         
             if (!user) throw new ErrorHandler(httpStatus.bad, `Can't verify this user.`);
             
-            return _.pick(user, ['_id', 'name', 'email', 'status']);
+            return _.pick(user, ['_id', 'username', 'email', 'status']);
         } catch (error) {
             throw new ErrorHandler(httpStatus.bad, error.message);
         }
