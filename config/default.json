@@ -2,6 +2,6 @@
   "name": "Prinvt App",
   "jwtPrivateKey": "1234",
   "db": "mongodb://localhost/prinvt",
-  "emailService": "noreply.prinvt@aol.com",
-  "passwordEmailService": "fgflbjadmnsounez"
+  "emailService": "xxxxxxxxxxxxxxx",
+  "passwordEmailService": "xxxxxxxxx"
 }
