@@ -10,30 +10,8 @@ const config = require('config');
 const emailNotificationService = require('./emailNotificationService');
 const emailTemplate = require('../email/template');
 const parser = require('ua-parser-js');
-const { Event, validate: validateEvents } = require('../models/event');
 
 class UserService {
-    static async insertEvents(req) {
-      const payload = _.get(req, 'body');
-      payload.createdBy = req.user._id
-      const { error } = validateEvents(payload);
-      if (error) {
-        throw new ErrorHandler(httpStatus.bad, error.details[0].message);
-      }
-      const { createdBy, eventName, eventDetail, startDate, endDate, province, city, detailLocation, isMultiScan } = payload
-      const newevent = new Event({
-        createdBy, eventName, eventDetail, startDate, endDate, province, city, detailLocation, isMultiScan
-      });
-      await newevent.save()
-      return newevent
-    }
-
-    static async getAllEventByUserId(req) {
-      const createdBy = req.user._id;
-      const events = await Event.find({ createdBy }).exec();
-      return events;
-    }
-
     static async login(req) {
       const payload = _.get(req, 'body');
       const { error } = UserService._loginValidate(payload);
@@ -147,7 +125,7 @@ class UserService {
         user.password = await bcrypt.hashSync(user.password, salt);
         await user.save();
         const token = user.generateVerificationToken();
-        const link = `http://localhost:3000/verification/${token}`
+        const link = `${config.get('host')}/verification/${token}`
         let breaklink = ''
         link.match(/.{1,50}/g).forEach(link => {
             breaklink = breaklink + '<br />' + link

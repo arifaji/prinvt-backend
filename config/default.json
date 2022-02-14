@@ -3,5 +3,6 @@
   "jwtPrivateKey": "1234",
   "db": "mongodb://localhost/prinvt",
   "emailService": "xxxxxxxxxxxxxxx",
-  "passwordEmailService": "xxxxxxxxx"
+  "passwordEmailService": "xxxxxxxxx",
+  "host": "localhost:8000"
 }
