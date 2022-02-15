@@ -29,6 +29,29 @@ class EventService {
     const event = await Event.findById(req.params.id);
     return event;
   }
+
+  static async updateEventById(req) {
+    const { eventName, eventDetail, startDate, endDate, province, city, detailLocation, isMultiScan } = req.body
+    const event = await Event.findByIdAndUpdate(req.body._id, { 
+      eventName,
+      eventDetail,
+      startDate,
+      endDate,
+      province,
+      city,
+      detailLocation,
+      isMultiScan
+    },
+    {
+      new: true
+    });
+
+    if (!event) {
+      throw new ErrorHandler(httpStatus.bad, 'Event not exist');
+    };
+    
+    return event; 
+  }
 };
 
 module.exports = EventService;

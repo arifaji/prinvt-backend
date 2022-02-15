@@ -36,6 +36,15 @@ class EventController {
       next(error);
     }
   }
+
+  static async updateEventById(req, res, next) {
+    try {
+      const event = await eventService.updateEventById(req);
+      response.ok(res, event);
+    } catch (error) {
+      next(error);
+    }
+  }
 };
 
 module.exports = EventController;
